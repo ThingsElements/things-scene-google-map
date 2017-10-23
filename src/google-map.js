@@ -200,6 +200,9 @@ export default class GoogleMap extends HTMLOverlayContainer {
   }
 
   setElementProperties(div) {
+    setTimeout(() => {
+      google.maps.event.trigger(this.map, "resize");
+    }, 1);
   }
 
   onchange(after, before) {
