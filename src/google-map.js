@@ -199,13 +199,14 @@ export default class GoogleMap extends HTMLOverlayContainer {
         lng
       } = component.model
 
-      markers.push(new google.maps.Marker({
+      let marker = new google.maps.Marker({
         position: {
           lat,
           lng
         },
         map: this.map
-      }))
+      })
+      markers.push(marker)
 
       markers.push(marker)
       component.marker = marker

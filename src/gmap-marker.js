@@ -45,8 +45,9 @@ export default class GMapMarker extends RectPath(Shape) {
     map && map.addMarker(this)
   }
 
-  onmarkerclick() {
+  onmarkerclick(e) {
     console.log('click...')
+    this.trigger('click', e)
   }
 
   onmarkermouseover() {
