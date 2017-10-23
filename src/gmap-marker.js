@@ -46,11 +46,15 @@ export default class GMapMarker extends RectPath(Shape) {
   }
 
   onmarkerclick() {
-
+    console.log('click...')
   }
 
   onmarkermouseover() {
+    console.log('mouseover...')
+  }
 
+  onmarkermouseout() {
+    console.log('mouseout...')
   }
 
   set marker(marker) {
@@ -64,6 +68,7 @@ export default class GMapMarker extends RectPath(Shape) {
     if(marker) {
       marker.addListener('click', this.onmarkerclick.bind(this))
       marker.addListener('mouseover', this.onmarkermouseover.bind(this))
+      marker.addListener('mouseout', this.onmarkermouseout.bind(this))
 
       this._marker = marker
     }
@@ -107,10 +112,6 @@ export default class GMapMarker extends RectPath(Shape) {
     id = id || this.get('targetMap')
 
     return id && this.root.findById(id)
-  }
-
-  onmarkerclick() {
-
   }
 
   get click_handler() {
