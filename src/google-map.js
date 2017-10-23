@@ -49,7 +49,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
     var script = document.createElement('script');
     script.onload = function() {
-      GoogleMap._loaded = true
+      GoogleMap.loaded = true
       GoogleMap.readies.forEach(component => component.onload())
       delete GoogleMap.readies
     }
@@ -64,24 +64,23 @@ export default class GoogleMap extends HTMLOverlayContainer {
   createElement() {
     super.createElement();
 
+    this._markerComponents = []
+    this._markers = []
+
     GoogleMap.load(this)
   }
 
   onload() {
-    var marker = this.marker
+    var map = this.map
+
+    this.buildMarkers()
+
+    // setting options here ..
   }
 
   get tagName() {
     return 'div'
   }
-
-  // get value() {
-  //   this.get('href')
-  // }
-
-  // set value(v) {
-  //   this.set('href', v)
-  // }
 
   get map() {
     if(!this._map) {
@@ -93,36 +92,128 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
       this._map = new google.maps.Map(this.element, {
         zoom,
-        center: {lat, lng}
+        center: { lat, lng }
       });
     }
 
     return this._map
   }
 
-  get marker() {
-    if(!this._marker) {
-      let { lat, lng } = this.model
+  dispose() {
+    this._markerComponents && this._markerComponents.slice().forEach(component => {
+      this.removeMarker(component)
+    })
 
-      this._marker = new google.maps.Marker({
+    delete this._markerComponents
+    delete this._markers
+
+    super.dispose()
+  }
+
+  buildMarkers() {
+    var markers = []
+
+    this._markerComponents.forEach(component => {
+      let { lat, lng } = component.model
+
+      markers.push(new google.maps.Marker({
         position: { lat, lng },
         map: this.map
-      });
+      }))
+    })
+
+    this._markers = markers
+  }
+
+  refreshMarkers() {
+    var markers = this._markers
+
+    if(!GoogleMap.loaded)
+      return
+
+    this._markerComponents.forEach((component, idx) => {
+      let marker = markers[idx]
+      let { lat, lng } = component.model
+
+      marker.setPosition(new google.maps.Marker({
+        position: { lat, lng },
+        map: this.map
+      }))
+    })
+  }
+
+  touchMarker(component) {
+    var idx = this._markerComponents.indexOf(component)
+    if(idx == -1 || !GoogleMap.loaded)
+      return
+
+    var marker = this._markers[idx]
+    var { lat, lng } = component.model
+
+    marker.setPosition(new google.maps.Marker({
+      position: { lat, lng },
+      map: this.map
+    }))
+  }
+
+  onmarkerchange(after, before, hint) {
+    var component = hint.source
+
+    if(after.hasOwnProperty('lat') || after.hasOwnProperty('lng'))
+      this.touchMarker(component)
+  }
+
+  addMarker(component) {
+    var markerComponents = this._markerComponents
+    var markers = this._markers
+
+    if(markerComponents.indexOf(component) == -1) {
+      markerComponents.push(component)
+      component.on('change', this.onmarkerchange)
+
+      if(!GoogleMap.loaded)
+        return
+
+      let { lat, lng } = component.model
+
+      markers.push(new google.maps.Marker({
+        position: { lat, lng },
+        map: this.map
+      }))
+    }
+  }
+
+  removeMarker(component) {
+    var idx = this._markerComponents.indexOf(component)
+    if(idx == -1)
+      return
+
+    component.off('change', this.onmarkerchange)
+    this._markerComponents.splice(idx, 1)
+    this._markers.splice(idx, 1)
+  }
+
+  get markers() {
+    if(!this._markerComponents) {
+      this._markerComponents = []
+      this._markers = []
     }
 
-    return this._marker
+    return this._markers
   }
 
   setElementProperties(div) {
   }
 
   onchange(after, before) {
-    if(after.zoom)
-      this.map.setZoom(after.zoom)
+    if(GoogleMap.loaded) {
+      if(after.zoom)
+        this.map.setZoom(after.zoom)
 
-    if(after.lat || after.lng) {
-      let { lat, lng } = this.model
-      this.map.setCenter(new google.maps.LatLng(lat, lng));
+      if(after.hasOwnProperty('lat') || after.hasOwnProperty('lng')) {
+        let { lat, lng } = this.model
+        this.map.setCenter(new google.maps.LatLng(lat, lng));
+      }
     }
 
     super.onchange(after, before)

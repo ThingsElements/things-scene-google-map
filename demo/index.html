@@ -79,6 +79,7 @@ Copyright © HatioLab Inc. All rights reserved.
           height: 480,
           components: [{
             type: 'google-map',
+            id: 'map-01',
             top: 10,
             left: 10,
             width: 620,
@@ -93,6 +94,7 @@ Copyright © HatioLab Inc. All rights reserved.
             apiKey: 'AIzaSyBgQZb-SFqjQBC_XTxNiz0XapejNwV9PgA'
           }, {
             type: 'google-map',
+            id: 'map-02',
             top: 10,
             left: 640,
             width: 620,
@@ -105,6 +107,32 @@ Copyright © HatioLab Inc. All rights reserved.
             lng: 131.044,
             zoom: 4,
             apiKey: 'AIzaSyBgQZb-SFqjQBC_XTxNiz0XapejNwV9PgA'
+          }, {
+            type: 'gmap-marker',
+            top: 100,
+            left: -100,
+            width: 20,
+            height: 20,
+            fillStyle: '#00ff00',
+            fontColor: '#FF0000',
+            strokeStyle: '#000',
+            lineWidth: 1,
+            targetMap: 'map-02',
+            lat: -25.363,
+            lng: 131.044
+          }, {
+            type: 'gmap-marker',
+            top: 150,
+            left: -100,
+            width: 20,
+            height: 20,
+            fillStyle: '#00ff00',
+            fontColor: '#FF0000',
+            strokeStyle: '#000',
+            lineWidth: 1,
+            targetMap: 'map-01',
+            lat: 37,
+            lng: 126
           }]
         }
       });
