@@ -122,7 +122,14 @@ export default class GoogleMap extends HTMLOverlayContainer {
     anchor.style.width = width * scale.x + 'px'
     anchor.style.height = height * scale.y + 'px'
 
-    GoogleMap.loaded && google.maps.event.trigger(this.map, "resize");
+    if (GoogleMap.loaded) {
+      google.maps.event.trigger(this.map, "resize");
+      this.map.setCenter({
+        lat: this.model.lat,
+        lng: this.model.lng
+      })
+    }
+
   }
 
   createElement() {
