@@ -35,12 +35,38 @@ export default class GMapMarker extends RectPath(Shape) {
     var map = this.findMap()
     map && map.removeMarker(this)
 
+    delete this._marker
+
     super.dispose()
   }
 
   ready() {
     var map = this.findMap()
     map && map.addMarker(this)
+  }
+
+  onmarkerclick() {
+
+  }
+
+  onmarkermouseover() {
+
+  }
+
+  set marker(marker) {
+    if(this._marker) {
+      this._marker.setMap(null);
+      google.maps.event.clearInstanceListeners(this._marker);
+
+      delete this._marker
+    }
+
+    if(marker) {
+      marker.addListener('click', this.onmarkerclick.bind(this))
+      marker.addListener('mouseover', this.onmarkermouseover.bind(this))
+
+      this._marker = marker
+    }
   }
 
   _draw(context) {
@@ -83,14 +109,26 @@ export default class GMapMarker extends RectPath(Shape) {
     return id && this.root.findById(id)
   }
 
+  onmarkerclick() {
+
+  }
+
+  get click_handler() {
+    if(!this._click_handler)
+      this._click_handler = this.onmarkerclick.bind(this)
+
+    return this._click_handler
+  }
+
   onchange(after, before) {
     if(before.targetMap) {
       var map = this.findMap(before.targetMap)
       map && map.removeMarker(this)
     }
+
     if(after.targetMap) {
       var map = this.findMap(after.targetMap)
-      map && map.addMarker(this)
+      var marker = map && map.addMarker(this)
     }
 
     super.onchange && super.onchange(after, before)

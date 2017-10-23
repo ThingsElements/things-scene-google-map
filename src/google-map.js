@@ -171,11 +171,14 @@ export default class GoogleMap extends HTMLOverlayContainer {
         return
 
       let { lat, lng } = component.model
-
-      markers.push(new google.maps.Marker({
+      let marker = new google.maps.Marker({
         position: { lat, lng },
         map: this.map
-      }))
+      })
+
+      markers.push(marker)
+      if(component.onmarkerchange)
+        marker.addListener('click', component.onmarkerchange.bind(component));
     }
   }
 
@@ -186,8 +189,12 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
     component.off('change', this._onmarkerchange)
     this._markerComponents.splice(idx, 1)
-    var marker = this._markers.splice(idx, 1)
-    marker && marker[0] && marker[0].setMap(null)
+    var removals = this._markers.splice(idx, 1)
+    if(removals && removals[0]) {
+      let removal = removals[0]
+      removal.setMap(null)
+      google.maps.event.clearInstanceListeners(removal);
+    }
   }
 
   get markers() {
