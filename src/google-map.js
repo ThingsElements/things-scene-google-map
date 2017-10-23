@@ -190,7 +190,8 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
     component.off('change', this.onmarkerchange)
     this._markerComponents.splice(idx, 1)
-    this._markers.splice(idx, 1)
+    var marker = this._markers.splice(idx, 1)
+    marker && marker.setMap(null)
   }
 
   get markers() {
