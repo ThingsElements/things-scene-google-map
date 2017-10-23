@@ -41,21 +41,22 @@ export default class GMapMarker extends RectPath(Shape) {
   }
 
   ready() {
+    super.ready()
+
     var map = this.findMap()
     map && map.addMarker(this)
   }
 
   onmarkerclick(e) {
-    console.log('click...')
     this.trigger('click', e)
   }
 
-  onmarkermouseover() {
-    console.log('mouseover...')
+  onmarkermouseover(e) {
+    this.trigger('mouseenter', e)
   }
 
-  onmarkermouseout() {
-    console.log('mouseout...')
+  onmarkermouseout(e) {
+    this.trigger('mouseleave', e)
   }
 
   set marker(marker) {
@@ -75,10 +76,15 @@ export default class GMapMarker extends RectPath(Shape) {
     }
   }
 
-  _draw(context) {
+  get hidden() {
+    return super.hidden || this.app.isViewMode
+  }
 
-    if(this.app.isViewMode)
-      return
+  set hidden(hidden) {
+    super.hidden = hidden
+  }
+
+  _draw(context) {
 
     var {
       top,
@@ -100,11 +106,6 @@ export default class GMapMarker extends RectPath(Shape) {
     context.bezierCurveTo(width, height / 2, width / 1.7, height * 0.6, width / 2, height * 0.9)
 
     context.closePath()
-
-    this.drawFill(context)
-    this.drawStroke(context)
-
-    context.translate(-left, -top)
   }
 
   get controls() {}
