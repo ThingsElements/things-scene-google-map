@@ -33,7 +33,7 @@ var {
   HTMLOverlayContainer
 } = scene
 
-function scaleAndRotationToTop(component) {
+function getGlobalScale(component) {
   var scale = {x: 1, y: 1};
   var parent = component;
 
@@ -106,7 +106,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
     var anchor = this._anchor;
     if(!anchor)
       return
-    var scale = scaleAndRotationToTop(this)
+    var scale = getGlobalScale(this)
 
     var sx = 1 / scale.x
     var sy = 1 / scale.y
