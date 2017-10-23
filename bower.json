@@ -19,7 +19,7 @@
     "/test/"
   ],
   "dependencies": {
-    "things-scene-core": "ThingsElements/things-scene-core#^2.0.0"    
+    "things-scene-core": "ThingsElements/things-scene-core#^2.0.0"
   },
   "devDependencies": {
     "polymer": "Polymer/polymer#^1.2.0",

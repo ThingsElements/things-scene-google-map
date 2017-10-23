@@ -32,7 +32,7 @@ const NATURE = {
 export default class GMapMarker extends RectPath(Shape) {
 
   dispose() {
-    var map = findMap()
+    var map = this.findMap()
     map && map.removeMarker(this)
 
     super.dispose()
@@ -93,7 +93,7 @@ export default class GMapMarker extends RectPath(Shape) {
       map && map.addMarker(this)
     }
 
-    super.onchange(after, before)
+    super.onchange && super.onchange(after, before)
   }
 
   get nature() {
