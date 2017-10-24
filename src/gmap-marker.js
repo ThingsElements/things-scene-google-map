@@ -1,6 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
+
 var {
   Component,
   RectPath,
@@ -35,6 +36,7 @@ export default class GMapMarker extends RectPath(Shape) {
     var map = this.findMap()
     map && map.removeMarker(this)
 
+    delete this._infoWindow
     delete this._marker
 
     super.dispose()
@@ -47,16 +49,52 @@ export default class GMapMarker extends RectPath(Shape) {
     map && map.addMarker(this)
   }
 
+  get infoWindow() {
+    if (!this._infoWindow)
+      this._infoWindow = new google.maps.InfoWindow()
+
+    return this._infoWindow;
+  }
+
+  findInfoWindow() {
+    var { infoWindow } = this.model.event.hover;
+
+    if (infoWindow)
+      return this.root.findById(infoWindow)
+  }
+
+  setInfoContent() {
+    var sceneInfoWindow = this.findInfoWindow();
+
+    var tpl = Component.template(sceneInfoWindow.model.frontSideTemplate);
+    var content = `<style>${sceneInfoWindow.model.style}</style>` + tpl(this);
+
+    this.infoWindow.setContent(content);
+  }
+
+  openInfoWindow() {
+    this.setInfoContent()
+
+    var map = this.findMap();
+    if (!map || !map.map)
+      return
+
+    this.infoWindow.open(map.map, this._marker)
+  }
+
   onmarkerclick(e) {
     this.trigger('click', e)
   }
 
   onmarkermouseover(e) {
-    this.trigger('mouseenter', e)
+    this.openInfoWindow();
+
+    // this.trigger('mouseenter', e)
   }
 
   onmarkermouseout(e) {
-    this.trigger('mouseleave', e)
+    this.infoWindow.close();
+    // this.trigger('mouseleave', e)
   }
 
   set marker(marker) {

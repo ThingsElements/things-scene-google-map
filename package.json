@@ -1,6 +1,6 @@
 {
   "name": "things-scene-google-map",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "An element providing a starting point for your own reusable Polymer elements.",
   "main": "index.js",
   "directories": {
@@ -33,13 +33,15 @@
     "babelify": "~7.2.0",
     "browserify": "~10.2.4",
     "chai": "^3.4.1",
+    "gulp": "^3.8.5",
+    "gulp-header-license": "^1.0.9",
     "mocha": "^2.3.4",
+    "node-canvas": "Automattic/node-canvas",
     "should": "^8.0.2",
     "uglify-js": "^3.0.17",
-    "watchify": "^3.3.1",
-    "node-canvas": "Automattic/node-canvas",
-    "gulp": "^3.8.5",
-    "gulp-header-license": "^1.0.9"
+    "watchify": "^3.3.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "lodash": "^4.17.4"
+  }
 }
