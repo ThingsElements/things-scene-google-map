@@ -142,8 +142,9 @@ export default class GMapMarker extends RectPath(Shape) {
     context.ellipse(width / 2, height / 4, width / 2, height / 4, 0, Math.PI * 1, Math.PI * 0)
 
     context.bezierCurveTo(width, height / 2, width / 1.7, height * 0.6, width / 2, height * 0.9)
-
     context.closePath()
+
+    context.translate(-left, -top)
   }
 
   get controls() {}
