@@ -27,7 +27,8 @@ const NATURE = {
     label: 'longitude',
     name: 'lng',
     property: 'lng'
-  }]
+  }],
+  'value-property': 'latlng'
 }
 
 export default class GMapMarker extends RectPath(Shape) {
@@ -180,6 +181,17 @@ export default class GMapMarker extends RectPath(Shape) {
     }
 
     super.onchange && super.onchange(after, before)
+  }
+
+  get latlng() {
+    return {
+      lat: this.get('lat'),
+      lng: this.get('lng')
+    }
+  }
+
+  set latlng(latlng) {
+    this.set(latlng)
   }
 
   get nature() {

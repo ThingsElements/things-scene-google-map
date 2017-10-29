@@ -26,7 +26,8 @@ const NATURE = {
     label: 'api-key',
     name: 'apiKey',
     property: 'apiKey'
-  }]
+  }],
+  'value-property': 'latlng'
 }
 
 var {
@@ -313,6 +314,17 @@ export default class GoogleMap extends HTMLOverlayContainer {
     super.onchange(after, before)
 
     this.rescale()
+  }
+
+  get latlng() {
+    return {
+      lat: this.get('lat'),
+      lng: this.get('lng')
+    }
+  }
+
+  set latlng(latlng) {
+    this.set(latlng)
   }
 
   get nature() {

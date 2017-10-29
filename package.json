@@ -1,6 +1,6 @@
 {
   "name": "things-scene-google-map",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "An element providing a starting point for your own reusable Polymer elements.",
   "main": "index.js",
   "directories": {
