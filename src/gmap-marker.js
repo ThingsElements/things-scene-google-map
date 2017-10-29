@@ -56,15 +56,15 @@ export default class GMapMarker extends RectPath(Shape) {
     return this._infoWindow;
   }
 
-  findInfoWindow() {
-    var { infoWindow } = this.model.event.hover;
+  findInfoWindow(type) {
+    var event = this.model.event;
+    var infoWindow = event && event[type] && event[type].infoWindow
 
     if (infoWindow)
       return this.root.findById(infoWindow)
   }
 
-  setInfoContent() {
-    var sceneInfoWindow = this.findInfoWindow();
+  setInfoContent(sceneInfoWindow) {
 
     var tpl = Component.template(sceneInfoWindow.model.frontSideTemplate);
     var content = `<style>${sceneInfoWindow.model.style}</style>` + tpl(this);
@@ -72,8 +72,8 @@ export default class GMapMarker extends RectPath(Shape) {
     this.infoWindow.setContent(content);
   }
 
-  openInfoWindow() {
-    this.setInfoContent()
+  openInfoWindow(iw) {
+    this.setInfoContent(iw)
 
     var map = this.findMap();
     if (!map || !map.map)
@@ -83,17 +83,23 @@ export default class GMapMarker extends RectPath(Shape) {
   }
 
   onmarkerclick(e) {
+    var iw = this.findInfoWindow('tap')
+    iw && this.openInfoWindow(iw);
+
     this.trigger('click', e)
   }
 
   onmarkermouseover(e) {
-    this.openInfoWindow();
+    var iw = this.findInfoWindow('hover')
+    iw && this.openInfoWindow(iw);
 
     // this.trigger('mouseenter', e)
   }
 
   onmarkermouseout(e) {
-    this.infoWindow.close();
+    var iw = this.findInfoWindow('hover')
+    iw && this.infoWindow.close();
+
     // this.trigger('mouseleave', e)
   }
 
