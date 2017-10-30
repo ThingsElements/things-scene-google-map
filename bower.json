@@ -1,6 +1,6 @@
 {
   "name": "things-scene-google-map",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "authors": [
     "Hatio Lab. <heartyoh@hatiolab.com>"
   ],
@@ -15,8 +15,19 @@
   "license": "http://things-scene.hatiolab.com/EULA/",
   "homepage": "https://github.com/ThingsElements/things-scene-google-map/",
   "ignore": [
-    "/.*",
-    "/test/"
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "src",
+    "docs",
+    "samples",
+    "demo",
+    "lib",
+    "DEPLOYMENT.md",
+    "DEVELOPMENT.md",
+    "things-scene-google-map.js"
   ],
   "dependencies": {
     "things-scene-core": "ThingsElements/things-scene-core#^2.0.0"
