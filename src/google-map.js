@@ -31,7 +31,9 @@ const NATURE = {
 }
 
 var {
-  HTMLOverlayContainer
+  HTMLOverlayContainer,
+  ScriptLoader,
+  error
 } = scene
 
 function getGlobalScale(component) {
@@ -51,31 +53,10 @@ function getGlobalScale(component) {
 export default class GoogleMap extends HTMLOverlayContainer {
 
   static load(component) {
-    if (GoogleMap.loaded) {
-      component.onload()
-      return
-    }
-
-    /* TODO google map api는 한번만 로딩되어야 한다. */
-    if (this.script) {
-      GoogleMap.readies.push(component)
-      return
-    }
-
-    this.readies = [component]
-
-    var script = document.createElement('script');
-    script.onload = function () {
-      GoogleMap.loaded = true
-      GoogleMap.readies.forEach(component => component.onload())
-      delete GoogleMap.readies
-    }
 
     var key = component.get('apiKey');
-    script.src = 'https://maps.googleapis.com/maps/api/js' + (key ? '?key=' + key : '');
-
-    document.head.appendChild(script)
-    GoogleMap.script = script
+    ScriptLoader.load('https://maps.googleapis.com/maps/api/js' + (key ? '?key=' + key : ''))
+    .then(() => component.onload(), error);
   }
 
   ready() {
@@ -148,6 +129,8 @@ export default class GoogleMap extends HTMLOverlayContainer {
   }
 
   onload() {
+    GoogleMap.loaded = true
+
     var map = this.map
 
     this.buildMarkers()
