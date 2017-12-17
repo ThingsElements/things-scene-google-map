@@ -1,9 +1,9 @@
 {
   "name": "@things-elements/things-scene-google-map",
   "flat": true,
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "An element providing a starting point for your own reusable Polymer elements.",
-  "main": "index.js",
+  "main": "things-scene-google-map-min.js",
   "directories": {
     "test": "test"
   },
