@@ -9,32 +9,29 @@ const NATURE = {
   properties: [{
     type: 'number',
     label: 'latitude',
-    name: 'lat',
-    property: 'lat'
+    name: 'lat'
   }, {
     type: 'number',
     label: 'longitude',
-    name: 'lng',
-    property: 'lng'
+    name: 'lng'
   }, {
     type: 'number',
     label: 'zoom',
-    name: 'zoom',
-    property: 'zoom'
+    name: 'zoom'
   }, {
     type: 'string',
     label: 'api-key',
-    name: 'apiKey',
-    property: 'apiKey'
+    name: 'apiKey'
   }],
   'value-property': 'latlng'
 }
 
-var {
+import {
+  Component,
   HTMLOverlayContainer,
   ScriptLoader,
   error
-} = scene
+} from '@hatiolab/things-scene';
 
 function getGlobalScale(component) {
   var scale = {x: 1, y: 1};
@@ -315,5 +312,5 @@ export default class GoogleMap extends HTMLOverlayContainer {
   }
 }
 
-scene.Component.register('google-map', GoogleMap);
+Component.register('google-map', GoogleMap);
 
