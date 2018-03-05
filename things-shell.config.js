@@ -1,50 +1,41 @@
 import locales from './locales'
 
+import gmap from './assets/google-map.png';
+import marker from './assets/gmap-marker';
+
 var templates = [{
-  name: 'Google MAP',
-  /* 다국어 키 표현을 어떻게.. */
-  description: '...',
-  /* 다국어 키 표현을 어떻게.. */
+  type: 'google-map',
+  description: 'google-map',
   group: 'etc',
   /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
-  icon: '../',
-  /* 또는, Object */
-  template: {
+  icon: gmap,
+  model: {
     type: 'google-map',
-    model: {
-      type: 'google-map',
-      left: 150,
-      top: 150,
-      width: 300,
-      height: 200,
-      lat: 22.308117,
-      lng: 114.225443,
-      zoom: 20,
-      apiKey: 'AIzaSyBgQZb-SFqjQBC_XTxNiz0XapejNwV9PgA'
-    }
+    left: 150,
+    top: 150,
+    width: 300,
+    height: 200,
+    lat: 22.308117,
+    lng: 114.225443,
+    zoom: 20,
+    apiKey: 'AIzaSyBgQZb-SFqjQBC_XTxNiz0XapejNwV9PgA'
   }
 }, {
-  name: 'GMap Marker',
-  /* 다국어 키 표현을 어떻게.. */
-  description: '...',
-  /* 다국어 키 표현을 어떻게.. */
+  type: 'gmap-marker',
+  description: 'google map marker',
   group: 'etc',
   /* line|shape|textAndMedia|chartAndGauge|table|container|dataSource|IoT|3D|warehouse|form|etc */
-  icon: '../',
-  /* 또는, Object */
-  template: {
+  icon: marker,
+  model: {
     type: 'gmap-marker',
-    model: {
-      type: 'gmap-marker',
-      left: 150,
-      top: 150,
-      width: 40,
-      height: 60,
-      lat: 22.308117,
-      lng: 114.225443,
-      fillStyle: '#00ff00',
-      hidden: true
-    }
+    left: 150,
+    top: 150,
+    width: 40,
+    height: 60,
+    lat: 22.308117,
+    lng: 114.225443,
+    fillStyle: '#00ff00',
+    hidden: true
   }
 }];
 
