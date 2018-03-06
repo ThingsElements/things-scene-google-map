@@ -1,7 +1,7 @@
 import locales from './locales'
 
 import gmap from './assets/google-map.png';
-import marker from './assets/gmap-marker';
+import marker from './assets/gmap-marker.png';
 
 var templates = [{
   type: 'google-map',
