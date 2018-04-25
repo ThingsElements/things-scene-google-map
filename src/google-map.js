@@ -242,7 +242,6 @@ export default class GoogleMap extends HTMLOverlayContainer {
         },
         map: this.map
       })
-      markers.push(marker)
 
       markers.push(marker)
       component.marker = marker
