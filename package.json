@@ -1,8 +1,8 @@
 {
   "name": "@things-elements/things-scene-google-map",
   "flat": true,
-  "version": "0.1.10",
-  "description": "An element providing a starting point for your own reusable Polymer elements.",
+  "version": "0.1.11",
+  "description": "baidu-map component for things-scene",
   "main": "things-scene-google-map-min.js",
   "directories": {
     "test": "test"
