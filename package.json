@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/ThingsElements/things-scene-google-map#readme",
   "devDependencies": {
-    "@hatiolab/things-shell": "^0.3.0"
+    "@hatiolab/things-shell": "^0.4.3"
   },
   "dependencies": {
     "@hatiolab/things-scene": "^2.2.36"
