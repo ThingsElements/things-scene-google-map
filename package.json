@@ -1,6 +1,6 @@
 {
   "name": "@things-scene/google-map",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "google-map component for things-scene",
   "main": "src/index.js",
   "things-scene": true,
