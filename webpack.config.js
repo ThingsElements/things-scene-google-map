@@ -28,22 +28,7 @@ const path = require('path');
       rules: [{
         test: /\.js$/,
         exclude: /(node_modules)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                'es2015', {
-                  targets: {
-                    browsers: ['last 2 Chrome versions', 'Safari 10']
-                  },
-                  debug: true
-                }
-              ]
-            ],
-            plugins: []
-          }
-        }
+        loader: 'babel-loader'
       }, {
         test: /\.(gif|jpe?g|png)$/,
         loader: 'url-loader?limit=25000',
