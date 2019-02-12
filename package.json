@@ -1,8 +1,10 @@
 {
   "name": "@things-scene/google-map",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "google-map component for things-scene",
   "main": "src/index.js",
+  "module": "dist/things-scene-google-map.mjs",
+  "jsnext:main": "dist/things-scene-google-map.mjs",
   "things-scene": true,
   "directories": {
     "test": "test"
@@ -11,8 +13,8 @@
     "serve": "things-shell",
     "serve:dev": "things-shell-dev",
     "build:client": "webpack --config node_modules/@hatiolab/things-shell/webpack.config.js",
-    "build": "webpack",
-    "prepublish": "webpack"
+    "build": "rollup -c",
+    "prepublish": "rollup -c"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,6 @@
     "@hatiolab/things-shell": "*"
   },
   "dependencies": {
-    "@hatiolab/things-scene": "*"
+    "@hatiolab/things-scene": "^2.5.0-rc"
   }
 }
