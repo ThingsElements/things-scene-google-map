@@ -2,11 +2,11 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 
-var {
+import {
   Component,
   RectPath,
   Shape
-} = scene
+} from '@hatiolab/things-scene';
 
 const NATURE = {
   mutable: false,
@@ -15,18 +15,15 @@ const NATURE = {
   properties: [{
     type: 'string',
     label: 'target-map',
-    name: 'targetMap',
-    property: 'targetMap'
+    name: 'targetMap'
   }, {
     type: 'number',
     label: 'latitude',
-    name: 'lat',
-    property: 'lat'
+    name: 'lat'
   }, {
     type: 'number',
     label: 'longitude',
-    name: 'lng',
-    property: 'lng'
+    name: 'lng'
   }],
   'value-property': 'latlng'
 }
