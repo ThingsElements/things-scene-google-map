@@ -3,7 +3,6 @@
   "version": "0.4.3",
   "description": "google-map component for things-scene",
   "main": "src/index.js",
-  "module": "dist/things-scene-google-map.mjs",
   "jsnext:main": "dist/things-scene-google-map.mjs",
   "things-scene": true,
   "directories": {

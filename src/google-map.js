@@ -6,23 +6,28 @@ const NATURE = {
   mutable: false,
   resizable: true,
   rotatable: true,
-  properties: [{
-    type: 'number',
-    label: 'latitude',
-    name: 'lat'
-  }, {
-    type: 'number',
-    label: 'longitude',
-    name: 'lng'
-  }, {
-    type: 'number',
-    label: 'zoom',
-    name: 'zoom'
-  }, {
-    type: 'string',
-    label: 'api-key',
-    name: 'apiKey'
-  }],
+  properties: [
+    {
+      type: 'number',
+      label: 'latitude',
+      name: 'lat'
+    },
+    {
+      type: 'number',
+      label: 'longitude',
+      name: 'lng'
+    },
+    {
+      type: 'number',
+      label: 'zoom',
+      name: 'zoom'
+    },
+    {
+      type: 'string',
+      label: 'api-key',
+      name: 'apiKey'
+    }
+  ],
   'value-property': 'latlng'
 }
 
@@ -31,45 +36,44 @@ import {
   HTMLOverlayContainer,
   ScriptLoader,
   error
-} from '@hatiolab/things-scene';
+} from '@hatiolab/things-scene'
 
 function getGlobalScale(component) {
-  var scale = {x: 1, y: 1};
-  var parent = component;
+  var scale = { x: 1, y: 1 }
+  var parent = component
 
-  while(parent) {
-    let { x, y } = parent.get('scale') || {x:1, y:1};
-    scale.x *= x || 1;
-    scale.y *= y || 1;
+  while (parent) {
+    let { x, y } = parent.get('scale') || { x: 1, y: 1 }
+    scale.x *= x || 1
+    scale.y *= y || 1
 
     parent = parent.parent
   }
-  return scale;
+  return scale
 }
 
 export default class GoogleMap extends HTMLOverlayContainer {
-
   static load(component) {
-
-    var key = component.get('apiKey');
-    ScriptLoader.load('https://maps.googleapis.com/maps/api/js' + (key ? '?key=' + key : ''))
-    .then(() => component.onload(), error);
+    var key = component.get('apiKey')
+    ScriptLoader.load(
+      'https://maps.googleapis.com/maps/api/js' + (key ? '?key=' + key : '')
+    ).then(() => component.onload(), error)
   }
 
   ready() {
     super.ready()
 
-    if(this.rootModel) {
+    if (this.rootModel) {
       this._listenTo = this.rootModel
       this._listener = function(after) {
         after.scale && this.rescale()
       }.bind(this)
-      this.rootModel.on('change', this._listener);
+      this.rootModel.on('change', this._listener)
     }
   }
 
   removed() {
-    if(this._listenTo) {
+    if (this._listenTo) {
       this._listenTo.off('change', this._listener)
 
       delete this._listenTo
@@ -82,19 +86,18 @@ export default class GoogleMap extends HTMLOverlayContainer {
    * 따라서, google map의 경우에는 부모의 스케일의 역으로 transform해서, scale을 1로 맞추어야 한다.
    */
   rescale() {
-    var anchor = this._anchor;
-    if(!anchor)
-      return
+    var anchor = this._anchor
+    if (!anchor) return
     var scale = getGlobalScale(this)
 
     var sx = 1 / scale.x
     var sy = 1 / scale.y
 
-    var transform = `scale(${sx}, ${sy})`;
+    var transform = `scale(${sx}, ${sy})`
 
-    ['-webkit-', '-moz-', '-ms-', '-o-', ''].forEach(prefix => {
-      anchor.style[prefix + 'transform'] = transform;
-      anchor.style[prefix + 'transform-origin'] = '0px 0px';
+    ;['-webkit-', '-moz-', '-ms-', '-o-', ''].forEach(prefix => {
+      anchor.style[prefix + 'transform'] = transform
+      anchor.style[prefix + 'transform-origin'] = '0px 0px'
     })
 
     var { width, height } = this.model
@@ -102,17 +105,16 @@ export default class GoogleMap extends HTMLOverlayContainer {
     anchor.style.height = height * scale.y + 'px'
 
     if (GoogleMap.loaded) {
-      google.maps.event.trigger(this.map, "resize");
+      google.maps.event.trigger(this.map, 'resize')
       this.map.setCenter({
         lat: this.model.lat,
         lng: this.model.lng
       })
     }
-
   }
 
   createElement() {
-    super.createElement();
+    super.createElement()
     this._anchor = document.createElement('div')
     this.element.appendChild(this._anchor)
     this.rescale()
@@ -141,11 +143,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
   get map() {
     if (!this._map) {
-      var {
-        lat,
-        lng,
-        zoom
-      } = this.model
+      var { lat, lng, zoom } = this.model
 
       this._map = new google.maps.Map(this._anchor, {
         zoom,
@@ -153,7 +151,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
           lat,
           lng
         }
-      });
+      })
     }
 
     return this._map
@@ -162,9 +160,10 @@ export default class GoogleMap extends HTMLOverlayContainer {
   dispose() {
     super.dispose()
 
-    this._markerComponents && this._markerComponents.slice().forEach(component => {
-      this.removeMarker(component)
-    })
+    this._markerComponents &&
+      this._markerComponents.slice().forEach(component => {
+        this.removeMarker(component)
+      })
 
     delete this._markerComponents
     delete this._markers
@@ -175,10 +174,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
     var markers = []
 
     this._markerComponents.forEach(component => {
-      let {
-        lat,
-        lng
-      } = component.model
+      let { lat, lng } = component.model
 
       let marker = new google.maps.Marker({
         position: {
@@ -197,14 +193,10 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
   touchMarker(component) {
     var idx = this._markerComponents.indexOf(component)
-    if (idx == -1 || !GoogleMap.loaded)
-      return
+    if (idx == -1 || !GoogleMap.loaded) return
 
     var marker = this._markers[idx]
-    var {
-      lat,
-      lng
-    } = component.model
+    var { lat, lng } = component.model
 
     marker.setPosition(new google.maps.LatLng(lat, lng))
   }
@@ -217,8 +209,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
   }
 
   addMarker(component) {
-    if(!this._markerComponents)
-      this._markerComponents = []
+    if (!this._markerComponents) this._markerComponents = []
 
     var markerComponents = this._markerComponents
     var markers = this._markers
@@ -227,13 +218,9 @@ export default class GoogleMap extends HTMLOverlayContainer {
       markerComponents.push(component)
       component.on('change', this._onmarkerchange)
 
-      if (!GoogleMap.loaded)
-        return
+      if (!GoogleMap.loaded) return
 
-      let {
-        lat,
-        lng
-      } = component.model
+      let { lat, lng } = component.model
 
       let marker = new google.maps.Marker({
         position: {
@@ -249,12 +236,10 @@ export default class GoogleMap extends HTMLOverlayContainer {
   }
 
   removeMarker(component) {
-    if(!this._markerComponents)
-      return
+    if (!this._markerComponents) return
 
     var idx = this._markerComponents.indexOf(component)
-    if (idx == -1)
-      return
+    if (idx == -1) return
 
     component.off('change', this._onmarkerchange)
     component.marker = null
@@ -278,15 +263,11 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
   onchange(after, before) {
     if (GoogleMap.loaded) {
-      if (after.zoom)
-        this.map.setZoom(after.zoom)
+      if (after.zoom) this.map.setZoom(after.zoom)
 
       if (after.hasOwnProperty('lat') || after.hasOwnProperty('lng')) {
-        let {
-          lat,
-          lng
-        } = this.model
-        this.map.setCenter(new google.maps.LatLng(lat, lng));
+        let { lat, lng } = this.model
+        this.map.setCenter(new google.maps.LatLng(lat, lng))
       }
     }
 
@@ -307,9 +288,8 @@ export default class GoogleMap extends HTMLOverlayContainer {
   }
 
   get nature() {
-    return NATURE;
+    return NATURE
   }
 }
 
-Component.register('google-map', GoogleMap);
-
+Component.register('google-map', GoogleMap)
