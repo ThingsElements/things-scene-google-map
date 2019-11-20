@@ -8,76 +8,86 @@ const NATURE = {
   rotatable: true,
   properties: [
     {
-      type: 'number',
-      label: 'latitude',
-      name: 'lat'
+      type: "number",
+      label: "latitude",
+      name: "lat",
+      property: {
+        step: 0.000001,
+        max: 90,
+        min: -90
+      }
     },
     {
-      type: 'number',
-      label: 'longitude',
-      name: 'lng'
+      type: "number",
+      label: "longitude",
+      name: "lng",
+      property: {
+        step: 0.000001,
+        min: -180,
+        max: 180
+      }
     },
     {
-      type: 'number',
-      label: 'zoom',
-      name: 'zoom'
+      type: "number",
+      label: "zoom",
+      name: "zoom"
     },
     {
-      type: 'string',
-      label: 'api-key',
-      name: 'apiKey'
+      type: "string",
+      label: "api-key",
+      name: "apiKey"
     }
   ],
-  'value-property': 'latlng'
-}
+  "value-property": "latlng"
+};
 
 import {
   Component,
   HTMLOverlayContainer,
   ScriptLoader,
   error
-} from '@hatiolab/things-scene'
+} from "@hatiolab/things-scene";
 
 function getGlobalScale(component) {
-  var scale = { x: 1, y: 1 }
-  var parent = component
+  var scale = { x: 1, y: 1 };
+  var parent = component;
 
   while (parent) {
-    let { x, y } = parent.get('scale') || { x: 1, y: 1 }
-    scale.x *= x || 1
-    scale.y *= y || 1
+    let { x, y } = parent.get("scale") || { x: 1, y: 1 };
+    scale.x *= x || 1;
+    scale.y *= y || 1;
 
-    parent = parent.parent
+    parent = parent.parent;
   }
-  return scale
+  return scale;
 }
 
 export default class GoogleMap extends HTMLOverlayContainer {
   static load(component) {
-    var key = component.get('apiKey')
+    var key = component.get("apiKey");
     ScriptLoader.load(
-      'https://maps.googleapis.com/maps/api/js' + (key ? '?key=' + key : '')
-    ).then(() => component.onload(), error)
+      "https://maps.googleapis.com/maps/api/js" + (key ? "?key=" + key : "")
+    ).then(() => component.onload(), error);
   }
 
   ready() {
-    super.ready()
+    super.ready();
 
     if (this.rootModel) {
-      this._listenTo = this.rootModel
+      this._listenTo = this.rootModel;
       this._listener = function(after) {
-        after.scale && this.rescale()
-      }.bind(this)
-      this.rootModel.on('change', this._listener)
+        after.scale && this.rescale();
+      }.bind(this);
+      this.rootModel.on("change", this._listener);
     }
   }
 
   removed() {
     if (this._listenTo) {
-      this._listenTo.off('change', this._listener)
+      this._listenTo.off("change", this._listener);
 
-      delete this._listenTo
-      delete this._listener
+      delete this._listenTo;
+      delete this._listener;
     }
   }
 
@@ -86,64 +96,64 @@ export default class GoogleMap extends HTMLOverlayContainer {
    * 따라서, google map의 경우에는 부모의 스케일의 역으로 transform해서, scale을 1로 맞추어야 한다.
    */
   rescale() {
-    var anchor = this._anchor
-    if (!anchor) return
-    var scale = getGlobalScale(this)
+    var anchor = this._anchor;
+    if (!anchor) return;
+    var scale = getGlobalScale(this);
 
-    var sx = 1 / scale.x
-    var sy = 1 / scale.y
+    var sx = 1 / scale.x;
+    var sy = 1 / scale.y;
 
-    var transform = `scale(${sx}, ${sy})`
+    var transform = `scale(${sx}, ${sy})`;
 
-    ;['-webkit-', '-moz-', '-ms-', '-o-', ''].forEach(prefix => {
-      anchor.style[prefix + 'transform'] = transform
-      anchor.style[prefix + 'transform-origin'] = '0px 0px'
-    })
+    ["-webkit-", "-moz-", "-ms-", "-o-", ""].forEach(prefix => {
+      anchor.style[prefix + "transform"] = transform;
+      anchor.style[prefix + "transform-origin"] = "0px 0px";
+    });
 
-    var { width, height } = this.model
-    anchor.style.width = width * scale.x + 'px'
-    anchor.style.height = height * scale.y + 'px'
+    var { width, height } = this.model;
+    anchor.style.width = width * scale.x + "px";
+    anchor.style.height = height * scale.y + "px";
 
     if (GoogleMap.loaded) {
-      google.maps.event.trigger(this.map, 'resize')
+      google.maps.event.trigger(this.map, "resize");
       this.map.setCenter({
         lat: this.model.lat,
         lng: this.model.lng
-      })
+      });
     }
   }
 
   createElement() {
-    super.createElement()
-    this._anchor = document.createElement('div')
-    this.element.appendChild(this._anchor)
-    this.rescale()
+    super.createElement();
+    this._anchor = document.createElement("div");
+    this.element.appendChild(this._anchor);
+    this.rescale();
 
-    this._markerComponents = []
-    this._markers = []
+    this._markerComponents = [];
+    this._markers = [];
 
-    this._onmarkerchange = this.onmarkerchange.bind(this)
+    this._onmarkerchange = this.onmarkerchange.bind(this);
 
-    GoogleMap.load(this)
+    GoogleMap.load(this);
   }
 
   onload() {
-    GoogleMap.loaded = true
+    GoogleMap.loaded = true;
 
-    var map = this.map
+    var map = this.map;
 
-    this.buildMarkers()
+    this.buildMarkers();
 
-    this.rescale()
+    this.rescale();
   }
 
   get tagName() {
-    return 'div'
+    return "div";
   }
 
   get map() {
     if (!this._map) {
-      var { lat, lng, zoom } = this.model
+      var { lat, lng, zoom } = this.model;
 
       this._map = new google.maps.Map(this._anchor, {
         zoom,
@@ -151,30 +161,30 @@ export default class GoogleMap extends HTMLOverlayContainer {
           lat,
           lng
         }
-      })
+      });
     }
 
-    return this._map
+    return this._map;
   }
 
   dispose() {
-    super.dispose()
+    super.dispose();
 
     this._markerComponents &&
       this._markerComponents.slice().forEach(component => {
-        this.removeMarker(component)
-      })
+        this.removeMarker(component);
+      });
 
-    delete this._markerComponents
-    delete this._markers
-    delete this._anchor
+    delete this._markerComponents;
+    delete this._markers;
+    delete this._anchor;
   }
 
   buildMarkers() {
-    var markers = []
+    var markers = [];
 
     this._markerComponents.forEach(component => {
-      let { lat, lng } = component.model
+      let { lat, lng } = component.model;
 
       let marker = new google.maps.Marker({
         position: {
@@ -182,45 +192,45 @@ export default class GoogleMap extends HTMLOverlayContainer {
           lng
         },
         map: this.map
-      })
-      markers.push(marker)
+      });
+      markers.push(marker);
 
-      component.marker = marker
-    })
+      component.marker = marker;
+    });
 
-    this._markers = markers
+    this._markers = markers;
   }
 
   touchMarker(component) {
-    var idx = this._markerComponents.indexOf(component)
-    if (idx == -1 || !GoogleMap.loaded) return
+    var idx = this._markerComponents.indexOf(component);
+    if (idx == -1 || !GoogleMap.loaded) return;
 
-    var marker = this._markers[idx]
-    var { lat, lng } = component.model
+    var marker = this._markers[idx];
+    var { lat, lng } = component.model;
 
-    marker.setPosition(new google.maps.LatLng(lat, lng))
+    marker.setPosition(new google.maps.LatLng(lat, lng));
   }
 
   onmarkerchange(after, before, hint) {
-    var component = hint.origin
+    var component = hint.origin;
 
-    if (after.hasOwnProperty('lat') || after.hasOwnProperty('lng'))
-      this.touchMarker(component)
+    if (after.hasOwnProperty("lat") || after.hasOwnProperty("lng"))
+      this.touchMarker(component);
   }
 
   addMarker(component) {
-    if (!this._markerComponents) this._markerComponents = []
+    if (!this._markerComponents) this._markerComponents = [];
 
-    var markerComponents = this._markerComponents
-    var markers = this._markers
+    var markerComponents = this._markerComponents;
+    var markers = this._markers;
 
     if (markerComponents.indexOf(component) == -1) {
-      markerComponents.push(component)
-      component.on('change', this._onmarkerchange)
+      markerComponents.push(component);
+      component.on("change", this._onmarkerchange);
 
-      if (!GoogleMap.loaded) return
+      if (!GoogleMap.loaded) return;
 
-      let { lat, lng } = component.model
+      let { lat, lng } = component.model;
 
       let marker = new google.maps.Marker({
         position: {
@@ -228,68 +238,68 @@ export default class GoogleMap extends HTMLOverlayContainer {
           lng
         },
         map: this.map
-      })
+      });
 
-      markers.push(marker)
-      component.marker = marker
+      markers.push(marker);
+      component.marker = marker;
     }
   }
 
   removeMarker(component) {
-    if (!this._markerComponents) return
+    if (!this._markerComponents) return;
 
-    var idx = this._markerComponents.indexOf(component)
-    if (idx == -1) return
+    var idx = this._markerComponents.indexOf(component);
+    if (idx == -1) return;
 
-    component.off('change', this._onmarkerchange)
-    component.marker = null
+    component.off("change", this._onmarkerchange);
+    component.marker = null;
 
-    this._markerComponents.splice(idx, 1)
-    var removals = this._markers.splice(idx, 1)
+    this._markerComponents.splice(idx, 1);
+    var removals = this._markers.splice(idx, 1);
   }
 
   get markers() {
     if (!this._markerComponents) {
-      this._markerComponents = []
-      this._markers = []
+      this._markerComponents = [];
+      this._markers = [];
     }
 
-    return this._markers
+    return this._markers;
   }
 
   setElementProperties(div) {
-    this.rescale()
+    this.rescale();
   }
 
   onchange(after, before) {
     if (GoogleMap.loaded) {
-      if (after.zoom) this.map.setZoom(after.zoom)
+      if (after.zoom) this.map.setZoom(after.zoom);
 
-      if (after.hasOwnProperty('lat') || after.hasOwnProperty('lng')) {
-        let { lat, lng } = this.model
-        this.map.setCenter(new google.maps.LatLng(lat, lng))
+      if (after.hasOwnProperty("lat") || after.hasOwnProperty("lng")) {
+        let { lat, lng } = this.model;
+        this.map.setCenter(new google.maps.LatLng(lat, lng));
       }
     }
 
-    super.onchange(after, before)
+    super.onchange(after, before);
 
-    this.rescale()
+    this.rescale();
   }
 
   get latlng() {
     return {
-      lat: this.get('lat'),
-      lng: this.get('lng')
-    }
+      lat: this.get("lat"),
+      lng: this.get("lng")
+    };
   }
 
   set latlng(latlng) {
-    this.set(latlng)
+    this.set(latlng);
   }
 
   get nature() {
-    return NATURE
+    return NATURE;
   }
 }
 
-Component.register('google-map', GoogleMap)
+Component.register("google-map", GoogleMap);

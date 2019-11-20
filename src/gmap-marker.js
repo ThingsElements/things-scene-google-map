@@ -2,7 +2,7 @@
  * Copyright © HatioLab Inc. All rights reserved.
  */
 
-import { Component, RectPath, Shape } from '@hatiolab/things-scene'
+import { Component, RectPath, Shape } from "@hatiolab/things-scene";
 
 const NATURE = {
   mutable: false,
@@ -10,129 +10,139 @@ const NATURE = {
   rotatable: true,
   properties: [
     {
-      type: 'id-input',
-      label: 'target-map',
-      name: 'targetMap',
+      type: "id-input",
+      label: "target-map",
+      name: "targetMap",
       property: {
-        component: 'google-map'
+        component: "google-map"
       }
     },
     {
-      type: 'number',
-      label: 'latitude',
-      name: 'lat'
+      type: "number",
+      label: "latitude",
+      name: "lat",
+      property: {
+        step: 0.000001,
+        max: 90,
+        min: -90
+      }
     },
     {
-      type: 'number',
-      label: 'longitude',
-      name: 'lng'
+      type: "number",
+      label: "longitude",
+      name: "lng",
+      property: {
+        step: 0.000001,
+        max: 180,
+        min: -180
+      }
     }
   ],
-  'value-property': 'latlng'
-}
+  "value-property": "latlng"
+};
 
 export default class GMapMarker extends RectPath(Shape) {
   dispose() {
-    var map = this.findMap()
-    map && map.removeMarker(this)
+    var map = this.findMap();
+    map && map.removeMarker(this);
 
-    delete this._infoWindow
-    delete this._marker
+    delete this._infoWindow;
+    delete this._marker;
 
-    super.dispose()
+    super.dispose();
   }
 
   ready() {
-    super.ready()
+    super.ready();
 
-    var map = this.findMap()
-    map && map.addMarker(this)
+    var map = this.findMap();
+    map && map.addMarker(this);
   }
 
   get infoWindow() {
-    if (!this._infoWindow) this._infoWindow = new google.maps.InfoWindow()
+    if (!this._infoWindow) this._infoWindow = new google.maps.InfoWindow();
 
-    return this._infoWindow
+    return this._infoWindow;
   }
 
   findInfoWindow(type) {
-    var event = this.model.event
-    var infoWindow = event && event[type] && event[type].infoWindow
+    var event = this.model.event;
+    var infoWindow = event && event[type] && event[type].infoWindow;
 
-    if (infoWindow) return this.root.findById(infoWindow)
+    if (infoWindow) return this.root.findById(infoWindow);
   }
 
   setInfoContent(sceneInfoWindow) {
-    var tpl = Component.template(sceneInfoWindow.model.frontSideTemplate)
-    var content = `<style>${sceneInfoWindow.model.style}</style>` + tpl(this)
+    var tpl = Component.template(sceneInfoWindow.model.frontSideTemplate);
+    var content = `<style>${sceneInfoWindow.model.style}</style>` + tpl(this);
 
-    this.infoWindow.setContent(content)
+    this.infoWindow.setContent(content);
   }
 
   openInfoWindow(iw) {
-    this.setInfoContent(iw)
+    this.setInfoContent(iw);
 
-    var map = this.findMap()
-    if (!map || !map.map) return
+    var map = this.findMap();
+    if (!map || !map.map) return;
 
-    this.infoWindow.open(map.map, this._marker)
+    this.infoWindow.open(map.map, this._marker);
   }
 
   onmarkerclick(e) {
-    var iw = this.findInfoWindow('tap')
-    iw && this.openInfoWindow(iw)
+    var iw = this.findInfoWindow("tap");
+    iw && this.openInfoWindow(iw);
 
-    this.trigger('click', e)
+    this.trigger("click", e);
   }
 
   onmarkermouseover(e) {
-    var iw = this.findInfoWindow('hover')
-    iw && this.openInfoWindow(iw)
+    var iw = this.findInfoWindow("hover");
+    iw && this.openInfoWindow(iw);
 
     // this.trigger('mouseenter', e)
   }
 
   onmarkermouseout(e) {
-    var iw = this.findInfoWindow('hover')
-    iw && this.infoWindow.close()
+    var iw = this.findInfoWindow("hover");
+    iw && this.infoWindow.close();
 
     // this.trigger('mouseleave', e)
   }
 
   set marker(marker) {
     if (this._marker) {
-      this._marker.setMap(null)
-      google.maps.event.clearInstanceListeners(this._marker)
+      this._marker.setMap(null);
+      google.maps.event.clearInstanceListeners(this._marker);
 
-      delete this._marker
+      delete this._marker;
     }
 
     if (marker) {
-      marker.addListener('click', this.onmarkerclick.bind(this))
-      marker.addListener('mouseover', this.onmarkermouseover.bind(this))
-      marker.addListener('mouseout', this.onmarkermouseout.bind(this))
+      marker.addListener("click", this.onmarkerclick.bind(this));
+      marker.addListener("mouseover", this.onmarkermouseover.bind(this));
+      marker.addListener("mouseout", this.onmarkermouseout.bind(this));
 
-      this._marker = marker
+      this._marker = marker;
     }
   }
 
   get hidden() {
-    return super.hidden || this.app.isViewMode
+    return super.hidden || this.app.isViewMode;
   }
 
   set hidden(hidden) {
-    super.hidden = hidden
+    super.hidden = hidden;
   }
 
   _draw(context) {
-    var { top, left, width, height } = this.model
+    var { top, left, width, height } = this.model;
 
-    context.translate(left, top)
+    context.translate(left, top);
 
     // 마커 모양 그리기
-    context.beginPath()
+    context.beginPath();
 
-    context.moveTo(width / 2, height * 0.9)
+    context.moveTo(width / 2, height * 0.9);
     context.bezierCurveTo(
       width / 2.3,
       height * 0.6,
@@ -140,7 +150,7 @@ export default class GMapMarker extends RectPath(Shape) {
       height / 2,
       0,
       height / 4
-    )
+    );
 
     context.ellipse(
       width / 2,
@@ -150,7 +160,7 @@ export default class GMapMarker extends RectPath(Shape) {
       0,
       Math.PI * 1,
       Math.PI * 0
-    )
+    );
 
     context.bezierCurveTo(
       width,
@@ -159,55 +169,55 @@ export default class GMapMarker extends RectPath(Shape) {
       height * 0.6,
       width / 2,
       height * 0.9
-    )
-    context.closePath()
+    );
+    context.closePath();
 
-    context.translate(-left, -top)
+    context.translate(-left, -top);
   }
 
   get controls() {}
 
   findMap(id) {
-    id = id || this.get('targetMap')
+    id = id || this.get("targetMap");
 
-    return id && this.root.findById(id)
+    return id && this.root.findById(id);
   }
 
   get click_handler() {
     if (!this._click_handler)
-      this._click_handler = this.onmarkerclick.bind(this)
+      this._click_handler = this.onmarkerclick.bind(this);
 
-    return this._click_handler
+    return this._click_handler;
   }
 
   onchange(after, before) {
     if (before.targetMap) {
-      var map = this.findMap(before.targetMap)
-      map && map.removeMarker(this)
+      var map = this.findMap(before.targetMap);
+      map && map.removeMarker(this);
     }
 
     if (after.targetMap) {
-      var map = this.findMap(after.targetMap)
-      var marker = map && map.addMarker(this)
+      var map = this.findMap(after.targetMap);
+      var marker = map && map.addMarker(this);
     }
 
-    super.onchange && super.onchange(after, before)
+    super.onchange && super.onchange(after, before);
   }
 
   get latlng() {
     return {
-      lat: this.get('lat'),
-      lng: this.get('lng')
-    }
+      lat: this.get("lat"),
+      lng: this.get("lng")
+    };
   }
 
   set latlng(latlng) {
-    this.set(latlng)
+    this.set(latlng);
   }
 
   get nature() {
-    return NATURE
+    return NATURE;
   }
 }
 
-Component.register('gmap-marker', GMapMarker)
+Component.register("gmap-marker", GMapMarker);
