@@ -182,22 +182,22 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
   buildMarkers() {
     var markers = [];
+    if (this._markerComponents) {
+      this._markerComponents.forEach(component => {
+        let { lat, lng } = component.model;
 
-    this._markerComponents.forEach(component => {
-      let { lat, lng } = component.model;
+        let marker = new google.maps.Marker({
+          position: {
+            lat,
+            lng
+          },
+          map: this.map
+        });
+        markers.push(marker);
 
-      let marker = new google.maps.Marker({
-        position: {
-          lat,
-          lng
-        },
-        map: this.map
+        component.marker = marker;
       });
-      markers.push(marker);
-
-      component.marker = marker;
-    });
-
+    }
     this._markers = markers;
   }
 
