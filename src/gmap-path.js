@@ -21,8 +21,12 @@ const NATURE = {
   "value-property": "latlngs"
 };
 
-const MARKER_PATH =
+const EMPTY_MARKER_PATH =
+  "M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z";
+const END_MARKER_PATH =
   "M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z M -2,-30 a 2,2 0 1,1 4,0 2,2 0 1,1 -4,0";
+const START_MARKER_PATH =
+  "M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z m -3,-34 l 0,8 l 8,-4 l -8,-4 z m -0,-0 l 0,8 l 8,-4 l -8,-4";
 
 export default class GMapPath extends RectPath(Shape) {
   dispose() {
@@ -106,7 +110,12 @@ export default class GMapPath extends RectPath(Shape) {
           },
           map: this.map,
           icon: {
-            path: MARKER_PATH,
+            path:
+              index == 0
+                ? START_MARKER_PATH
+                : index + 1 == latlngs.length
+                ? END_MARKER_PATH
+                : EMPTY_MARKER_PATH,
             fillColor,
             fillOpacity,
             strokeColor,
@@ -115,6 +124,15 @@ export default class GMapPath extends RectPath(Shape) {
           index
         })
     );
+
+    this.trackPath = new google.maps.Polyline({
+      path: latlngs,
+      geodesic: true,
+      strokeColor: "#FF0000",
+      strokeOpacity: 1,
+      strokeWeight: 4,
+      map: this.map
+    });
 
     var infowindows = new Array(markers.length);
 
@@ -133,6 +151,7 @@ export default class GMapPath extends RectPath(Shape) {
       marker.addListener("mouseout", () => {
         var infowindow = infowindows[index];
         infowindow && infowindow.close();
+        infowindows[index] = null;
       });
     });
 
@@ -158,6 +177,18 @@ export default class GMapPath extends RectPath(Shape) {
     }
 
     return this._markers;
+  }
+
+  get trackPath() {
+    return this._trackPath;
+  }
+
+  set trackPath(trackPath) {
+    if (this.trackPath) {
+      this.trackPath.setMap(null);
+    }
+
+    this._trackPath = trackPath;
   }
 
   get hidden() {
