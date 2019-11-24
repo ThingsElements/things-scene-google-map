@@ -110,7 +110,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
       anchor.style[prefix + "transform-origin"] = "0px 0px";
     });
 
-    var { width, height } = this.model;
+    var { width, height } = this.state;
     anchor.style.width = width * scale.x + "px";
     anchor.style.height = height * scale.y + "px";
 
@@ -145,6 +145,11 @@ export default class GoogleMap extends HTMLOverlayContainer {
         center: new google.maps.LatLng(lat, lng)
       });
     } finally {
+      /*
+       * setState 로 map 객체가 생성되었음을 change 이벤트로 알려줄 수 있다
+       * - set('map', this._map)으로 만들 지 않도록 주의한다.
+       * - setState('map', this._map)으로해야 컴포넌트 모델에 추가되지 않는다.
+       */
       this.setState("map", this._map);
       this.rescale();
     }
@@ -173,7 +178,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
       if (after.zoom) this.map.setZoom(after.zoom);
 
       if ("lat" in after || "lng" in after) {
-        let { lat, lng } = this.model;
+        let { lat, lng } = this.state;
         this.map.setCenter(new google.maps.LatLng(lat, lng));
       }
     }
