@@ -16,29 +16,9 @@ const NATURE = {
       property: {
         component: "google-map"
       }
-    },
-    {
-      type: "number",
-      label: "latitude",
-      name: "lat",
-      property: {
-        step: 0.000001,
-        max: 90,
-        min: -90
-      }
-    },
-    {
-      type: "number",
-      label: "longitude",
-      name: "lng",
-      property: {
-        step: 0.000001,
-        max: 180,
-        min: -180
-      }
     }
   ],
-  "value-property": "latlng"
+  "value-property": "latlngs"
 };
 
 const MARKER_PATH =
@@ -46,9 +26,9 @@ const MARKER_PATH =
 
 export default class GMapPath extends RectPath(Shape) {
   dispose() {
-    this.marker && this.marker && this.marker && this.marker.setMap(null);
+    this.markers && this.markers.forEach(marker => marker.setMap(null));
 
-    this.marker = null;
+    this.markers = null;
     delete this._infoWindow;
 
     super.dispose();
@@ -68,12 +48,6 @@ export default class GMapPath extends RectPath(Shape) {
     return this._map;
   }
 
-  get infoWindow() {
-    if (!this._infoWindow) this._infoWindow = new google.maps.InfoWindow();
-
-    return this._infoWindow;
-  }
-
   findInfoWindow(type) {
     var eventSetting = (this.state.event && this.state.event[type]) || {};
 
@@ -87,90 +61,103 @@ export default class GMapPath extends RectPath(Shape) {
     }
   }
 
-  setInfoContent(sceneInfoWindow) {
+  getInfoContent(sceneInfoWindow, index) {
     var tpl = Component.template(sceneInfoWindow.model.frontSideTemplate);
-    var content = `<style>${sceneInfoWindow.model.style}</style>` + tpl(this);
-
-    this.infoWindow.setContent(content);
+    return (
+      `<style>${sceneInfoWindow.model.style}</style>` +
+      tpl({
+        data: this.data,
+        index
+      })
+    );
   }
 
-  openInfoWindow(iw) {
-    this.setInfoContent(iw);
+  openInfoWindow(iw, index) {
+    var content = this.getInfoContent(iw, index);
 
-    // var map = this.findMap();
     if (!this.map) return;
 
-    this.map && this.infoWindow.open(this.map, this._marker);
+    var infoWindow = new google.maps.InfoWindow();
+    infoWindow.setContent(content);
+    infoWindow.open(this.map, this.markers[index]);
+
+    return infoWindow;
   }
 
-  onmarkerclick(e) {
-    var iw = this.findInfoWindow("tap");
-    iw && this.openInfoWindow(iw);
-
-    this.trigger("click", e);
-  }
-
-  onmarkermouseover(e) {
-    var iw = this.findInfoWindow("hover");
-    iw && this.openInfoWindow(iw);
-
-    // this.trigger('mouseenter', e)
-  }
-
-  onmarkermouseout(e) {
-    var iw = this.findInfoWindow("hover");
-    iw && this.infoWindow.close();
-
-    // this.trigger('mouseleave', e)
-  }
-
-  set marker(marker) {
-    if (this._marker) {
-      this._marker.setMap(null);
-      google.maps.event.clearInstanceListeners(this._marker);
-
-      delete this._marker;
+  buildMarkers() {
+    if (!this.map) {
+      return;
     }
 
-    if (marker) {
-      marker.addListener("click", this.onmarkerclick.bind(this));
-      marker.addListener("mouseover", this.onmarkermouseover.bind(this));
-      marker.addListener("mouseout", this.onmarkermouseout.bind(this));
+    let {
+      latlngs = [],
+      fillStyle: fillColor,
+      alpha: fillOpacity = 1,
+      strokeStyle: strokeColor,
+      lineWidth: strokeWeight
+    } = this.state;
 
-      this._marker = marker;
-    }
+    var markers = latlngs.map(
+      ({ lat, lng }, index) =>
+        new google.maps.Marker({
+          position: {
+            lat: Number(lat) || 0,
+            lng: Number(lng) || 0
+          },
+          map: this.map,
+          icon: {
+            path: MARKER_PATH,
+            fillColor,
+            fillOpacity,
+            strokeColor,
+            strokeWeight
+          },
+          index
+        })
+    );
+
+    var infowindows = new Array(markers.length);
+
+    markers.forEach((marker, index) => {
+      marker.addListener("click", () => {
+        var iw = this.findInfoWindow("tap");
+        iw && this.openInfoWindow(iw, index);
+
+        this.trigger("click", e);
+      });
+      marker.addListener("mouseover", () => {
+        var iw = this.findInfoWindow("hover");
+        if (!iw) return;
+        infowindows[index] = this.openInfoWindow(iw, index);
+      });
+      marker.addListener("mouseout", () => {
+        var infowindow = infowindows[index];
+        infowindow && infowindow.close();
+      });
+    });
+
+    this.markers = markers;
   }
 
-  get marker() {
-    if (!this._marker && this.map) {
-      let {
-        lat,
-        lng,
-        fillStyle: fillColor,
-        alpha: fillOpacity = 1,
-        strokeStyle: strokeColor,
-        lineWidth: strokeWeight
-      } = this.state;
-
-      var marker = new google.maps.Marker({
-        position: {
-          lat: Number(lat) || 0,
-          lng: Number(lng) || 0
-        },
-        map: this.map,
-        icon: {
-          path: MARKER_PATH,
-          fillColor,
-          fillOpacity,
-          strokeColor,
-          strokeWeight
-        }
+  set markers(markers) {
+    if (this._markers) {
+      this._markers.forEach(marker => {
+        marker.setMap(null);
+        google.maps.event.clearInstanceListeners(marker);
       });
 
-      this.marker = marker;
+      delete this._markers;
     }
 
-    return this._marker;
+    this._markers = markers;
+  }
+
+  get markers() {
+    if (!this._markers) {
+      this.buildMarkers();
+    }
+
+    return this._markers;
   }
 
   get hidden() {
@@ -241,14 +228,16 @@ export default class GMapPath extends RectPath(Shape) {
           var listener = after => {
             if ("map" in after) {
               this._map = after.map;
-              this.marker && this.marker.setMap(this.map);
+              this.markers &&
+                this.markers.forEach(marker => marker.setMap(this.map));
 
               this.targetMap.off("change", listener);
             }
           };
           this.targetMap.on("change", listener);
         } else {
-          this.marker && this.marker.setMap(this.map);
+          this.markers &&
+            this.markers.forEach(marker => marker.setMap(this.map));
         }
       }
     }
@@ -258,21 +247,13 @@ export default class GMapPath extends RectPath(Shape) {
     return this._targetMap;
   }
 
-  get click_handler() {
-    if (!this._click_handler)
-      this._click_handler = this.onmarkerclick.bind(this);
-
-    return this._click_handler;
-  }
-
   onchange(after, before) {
     if ("targetMap" in after) {
       this.onchangeTargetMap();
     }
 
-    if ("lat" in after || "lng" in after) {
-      var { lat, lng } = this.state;
-      this.marker && this.marker.setPosition(new google.maps.LatLng(lat, lng));
+    if ("latlngs" in after) {
+      this.buildMarkers();
     }
 
     if (
@@ -300,15 +281,14 @@ export default class GMapPath extends RectPath(Shape) {
     super.onchange && super.onchange(after, before);
   }
 
-  get latlng() {
-    return {
-      lat: this.get("lat"),
-      lng: this.get("lng")
-    };
+  get latlngs() {
+    return this.getState("latlngs");
   }
 
-  set latlng(latlng) {
-    this.setState(latlng);
+  set latlngs(latlngs) {
+    this.setState({
+      latlngs
+    });
   }
 
   get nature() {

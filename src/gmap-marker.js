@@ -46,7 +46,7 @@ const MARKER_PATH =
 
 export default class GMapMarker extends RectPath(Shape) {
   dispose() {
-    this.marker && this.marker && this.marker && this.marker.setMap(null);
+    this.marker && this.marker.setMap(null);
 
     this.marker = null;
     delete this._infoWindow;
@@ -97,10 +97,9 @@ export default class GMapMarker extends RectPath(Shape) {
   openInfoWindow(iw) {
     this.setInfoContent(iw);
 
-    // var map = this.findMap();
     if (!this.map) return;
 
-    this.map && this.infoWindow.open(this.map, this._marker);
+    this.infoWindow.open(this.map, this.marker);
   }
 
   onmarkerclick(e) {
@@ -113,15 +112,11 @@ export default class GMapMarker extends RectPath(Shape) {
   onmarkermouseover(e) {
     var iw = this.findInfoWindow("hover");
     iw && this.openInfoWindow(iw);
-
-    // this.trigger('mouseenter', e)
   }
 
   onmarkermouseout(e) {
     var iw = this.findInfoWindow("hover");
     iw && this.infoWindow.close();
-
-    // this.trigger('mouseleave', e)
   }
 
   set marker(marker) {
@@ -258,12 +253,12 @@ export default class GMapMarker extends RectPath(Shape) {
     return this._targetMap;
   }
 
-  get click_handler() {
-    if (!this._click_handler)
-      this._click_handler = this.onmarkerclick.bind(this);
+  // get click_handler() {
+  //   if (!this._click_handler)
+  //     this._click_handler = this.onmarkerclick.bind(this);
 
-    return this._click_handler;
-  }
+  //   return this._click_handler;
+  // }
 
   onchange(after, before) {
     if ("targetMap" in after) {
@@ -272,7 +267,10 @@ export default class GMapMarker extends RectPath(Shape) {
 
     if ("lat" in after || "lng" in after) {
       var { lat, lng } = this.state;
-      this.marker && this.marker.setPosition(new google.maps.LatLng(lat, lng));
+      this.latlng = {
+        lat,
+        lng
+      };
     }
 
     if (
@@ -302,13 +300,19 @@ export default class GMapMarker extends RectPath(Shape) {
 
   get latlng() {
     return {
-      lat: this.get("lat"),
-      lng: this.get("lng")
+      lat: this.getState("lat"),
+      lng: this.getState("lng")
     };
   }
 
   set latlng(latlng) {
-    this.setState(latlng);
+    var { lat, lng } = latlng;
+    this.marker && this.marker.setPosition(new google.maps.LatLng(lat, lng));
+
+    this.setState({
+      lat,
+      lng
+    });
   }
 
   get nature() {
