@@ -116,10 +116,12 @@ export default class GoogleMap extends HTMLOverlayContainer {
 
     if (GoogleMap.loaded) {
       google.maps.event.trigger(this.map, "resize");
-      this.map.setCenter({
-        lat: this.model.lat,
-        lng: this.model.lng
-      });
+      let { lat, lng } = this.state;
+      this.map &&
+        this.map.setCenter({
+          lat,
+          lng
+        });
     }
   }
 
@@ -129,22 +131,23 @@ export default class GoogleMap extends HTMLOverlayContainer {
     this.element.appendChild(this._anchor);
     this.rescale();
 
-    this._markerComponents = [];
-    this._markers = [];
-
-    this._onmarkerchange = this.onmarkerchange.bind(this);
-
     GoogleMap.load(this);
   }
 
   onload() {
     GoogleMap.loaded = true;
 
-    var map = this.map;
+    var { lat, lng, zoom } = this.state;
 
-    this.buildMarkers();
-
-    this.rescale();
+    try {
+      this._map = new google.maps.Map(this._anchor, {
+        zoom,
+        center: new google.maps.LatLng(lat, lng)
+      });
+    } finally {
+      this.setState("map", this._map);
+      this.rescale();
+    }
   }
 
   get tagName() {
@@ -152,119 +155,13 @@ export default class GoogleMap extends HTMLOverlayContainer {
   }
 
   get map() {
-    if (!this._map) {
-      var { lat, lng, zoom } = this.model;
-
-      this._map = new google.maps.Map(this._anchor, {
-        zoom,
-        center: {
-          lat,
-          lng
-        }
-      });
-    }
-
     return this._map;
   }
 
   dispose() {
     super.dispose();
 
-    this._markerComponents &&
-      this._markerComponents.slice().forEach(component => {
-        this.removeMarker(component);
-      });
-
-    delete this._markerComponents;
-    delete this._markers;
     delete this._anchor;
-  }
-
-  buildMarkers() {
-    var markers = [];
-    if (this._markerComponents) {
-      this._markerComponents.forEach(component => {
-        let { lat, lng } = component.model;
-
-        let marker = new google.maps.Marker({
-          position: {
-            lat,
-            lng
-          },
-          map: this.map
-        });
-        markers.push(marker);
-
-        component.marker = marker;
-      });
-    }
-    this._markers = markers;
-  }
-
-  touchMarker(component) {
-    var idx = this._markerComponents.indexOf(component);
-    if (idx == -1 || !GoogleMap.loaded) return;
-
-    var marker = this._markers[idx];
-    var { lat, lng } = component.model;
-
-    marker.setPosition(new google.maps.LatLng(lat, lng));
-  }
-
-  onmarkerchange(after, before, hint) {
-    var component = hint.origin;
-
-    if (after.hasOwnProperty("lat") || after.hasOwnProperty("lng"))
-      this.touchMarker(component);
-  }
-
-  addMarker(component) {
-    if (!this._markerComponents) this._markerComponents = [];
-
-    var markerComponents = this._markerComponents;
-    var markers = this._markers;
-
-    if (markerComponents.indexOf(component) == -1) {
-      markerComponents.push(component);
-      component.on("change", this._onmarkerchange);
-
-      if (!GoogleMap.loaded) return;
-
-      let { lat, lng } = component.model;
-
-      let marker = new google.maps.Marker({
-        position: {
-          lat,
-          lng
-        },
-        map: this.map
-      });
-
-      markers.push(marker);
-      component.marker = marker;
-    }
-  }
-
-  removeMarker(component) {
-    if (!this._markerComponents) return;
-
-    var idx = this._markerComponents.indexOf(component);
-    if (idx == -1) return;
-
-    component.off("change", this._onmarkerchange);
-    component.marker = null;
-
-    this._markerComponents.splice(idx, 1);
-    var removals = this._markers.splice(idx, 1);
-  }
-
-  get markers() {
-    if (!this._markerComponents) {
-      this._markerComponents = [];
-      this._markers = [];
-    }
-
-    return this._markers;
   }
 
   setElementProperties(div) {
@@ -275,7 +172,7 @@ export default class GoogleMap extends HTMLOverlayContainer {
     if (GoogleMap.loaded) {
       if (after.zoom) this.map.setZoom(after.zoom);
 
-      if (after.hasOwnProperty("lat") || after.hasOwnProperty("lng")) {
+      if ("lat" in after || "lng" in after) {
         let { lat, lng } = this.model;
         this.map.setCenter(new google.maps.LatLng(lat, lng));
       }

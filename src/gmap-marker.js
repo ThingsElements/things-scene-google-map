@@ -41,10 +41,12 @@ const NATURE = {
   "value-property": "latlng"
 };
 
+const MARKER_PATH =
+  "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z";
+
 export default class GMapMarker extends RectPath(Shape) {
   dispose() {
-    var map = this.findMap();
-    map && map.removeMarker(this);
+    this.marker && this.marker && this.marker && this.marker.setMap(null);
 
     delete this._infoWindow;
     delete this._marker;
@@ -55,8 +57,15 @@ export default class GMapMarker extends RectPath(Shape) {
   ready() {
     super.ready();
 
-    var map = this.findMap();
-    map && map.addMarker(this);
+    if (this.isTemplate()) {
+      return;
+    }
+
+    this.onchangeTargetMap();
+  }
+
+  get map() {
+    return this._map;
   }
 
   get infoWindow() {
@@ -82,10 +91,10 @@ export default class GMapMarker extends RectPath(Shape) {
   openInfoWindow(iw) {
     this.setInfoContent(iw);
 
-    var map = this.findMap();
-    if (!map || !map.map) return;
+    // var map = this.findMap();
+    if (!this.map) return;
 
-    this.infoWindow.open(map.map, this._marker);
+    this.map && this.infoWindow.open(this.map, this._marker);
   }
 
   onmarkerclick(e) {
@@ -124,6 +133,36 @@ export default class GMapMarker extends RectPath(Shape) {
 
       this._marker = marker;
     }
+  }
+
+  get marker() {
+    if (!this._marker && this.map) {
+      let {
+        lat,
+        lng,
+        fillStyle: fillColor,
+        alpha: fillOpacity,
+        strokeStyle: strokeColor,
+        lineWidth: strokeWeight
+      } = this.model;
+
+      this._marker = new google.maps.Marker({
+        position: {
+          lat: Number(lat) || 0,
+          lng: Number(lng) || 0
+        },
+        map: this.map,
+        icon: {
+          path: MARKER_PATH,
+          fillColor,
+          fillOpacity,
+          strokeColor,
+          strokeWeight
+        }
+      });
+    }
+
+    return this._marker;
   }
 
   get hidden() {
@@ -177,10 +216,42 @@ export default class GMapMarker extends RectPath(Shape) {
 
   get controls() {}
 
-  findMap(id) {
-    id = id || this.get("targetMap");
+  onchangeTargetMap() {
+    if (!this.app.isViewMode) {
+      return;
+    }
 
-    return id && this.root.findById(id);
+    if (this.targetMap) {
+      this._targetMap = null;
+      this._map = null;
+    }
+
+    var id = this.get("targetMap");
+    if (id !== undefined) {
+      this._targetMap = this.root.findById(id);
+
+      if (this.targetMap) {
+        this._map = this.targetMap.map;
+
+        if (!this.map) {
+          var listener = after => {
+            if ("map" in after) {
+              this._map = after.map;
+              this.marker && this.marker.setMap(this.map);
+
+              this.targetMap.off("change", listener);
+            }
+          };
+          this.targetMap.on("change", listener);
+        } else {
+          this.marker && this.marker.setMap(this.map);
+        }
+      }
+    }
+  }
+
+  get targetMap() {
+    return this._targetMap;
   }
 
   get click_handler() {
@@ -191,14 +262,13 @@ export default class GMapMarker extends RectPath(Shape) {
   }
 
   onchange(after, before) {
-    if (before.targetMap) {
-      var map = this.findMap(before.targetMap);
-      map && map.removeMarker(this);
+    if ("targetMap" in after) {
+      this.onchangeTargetMap();
     }
 
-    if (after.targetMap) {
-      var map = this.findMap(after.targetMap);
-      var marker = map && map.addMarker(this);
+    if ("lat" in after || "lng" in after) {
+      var { lat, lng } = this.state;
+      this.marker && this.marker.setPosition(new google.maps.LatLng(lat, lng));
     }
 
     super.onchange && super.onchange(after, before);
