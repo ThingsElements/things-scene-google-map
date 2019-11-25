@@ -141,7 +141,7 @@ export default class GMapPath extends RectPath(Shape) {
         var iw = this.findInfoWindow("tap");
         iw && this.openInfoWindow(iw, index);
 
-        this.trigger("click", e);
+        this.trigger("click", e.ya);
       });
       marker.addListener("mouseover", () => {
         var iw = this.findInfoWindow("hover");

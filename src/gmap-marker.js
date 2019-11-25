@@ -106,7 +106,7 @@ export default class GMapMarker extends RectPath(Shape) {
     var iw = this.findInfoWindow("tap");
     iw && this.openInfoWindow(iw);
 
-    this.trigger("click", e);
+    this.trigger("click", e.ya);
   }
 
   onmarkermouseover(e) {
