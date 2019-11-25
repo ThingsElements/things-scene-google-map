@@ -137,7 +137,7 @@ export default class GMapPath extends RectPath(Shape) {
     var infowindows = new Array(markers.length);
 
     markers.forEach((marker, index) => {
-      marker.addListener("click", () => {
+      marker.addListener("click", e => {
         var iw = this.findInfoWindow("tap");
         iw && this.openInfoWindow(iw, index);
 
