@@ -1,7 +1,7 @@
 /*
  * Copyright © HatioLab Inc. All rights reserved.
  */
-
-export { default as GMapMarker } from "./gmap-marker";
-export { default as GMapPath } from "./gmap-path";
-export { default as GoogleMap } from "./google-map";
+import GmapMarker from "./gmap-marker";
+import GmapPath from "./gmap-path";
+import GoogleMap from "./google-map";
+export default [GmapMarker, GmapPath, GoogleMap];
