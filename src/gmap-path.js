@@ -16,6 +16,16 @@ const NATURE = {
       property: {
         component: "google-map"
       }
+    },
+    {
+      type: "checkbox",
+      label: "show-path",
+      name: "showPath"
+    },
+    {
+      type: "checkbox",
+      label: "show-intermediate-markers",
+      name: "showIntermediateMarkers"
     }
   ],
   "value-property": "latlngs"
@@ -98,41 +108,73 @@ export default class GMapPath extends RectPath(Shape) {
       fillStyle: fillColor,
       alpha: fillOpacity = 1,
       strokeStyle: strokeColor,
-      lineWidth: strokeWeight
+      lineWidth: strokeWeight,
+      showIntermediateMarkers = false,
+      showPath = false
     } = this.state;
 
-    var markers = latlngs.map(
-      ({ lat, lng }, index) =>
-        new google.maps.Marker({
-          position: {
-            lat: Number(lat) || 0,
-            lng: Number(lng) || 0
-          },
-          map: this.map,
-          icon: {
-            path:
-              index == 0
-                ? START_MARKER_PATH
-                : index + 1 == latlngs.length
-                ? END_MARKER_PATH
-                : EMPTY_MARKER_PATH,
-            fillColor,
-            fillOpacity,
-            strokeColor,
-            strokeWeight
-          },
-          index
-        })
-    );
+    if (showIntermediateMarkers) {
+      var markers = latlngs.map(
+        ({ lat, lng }, index) =>
+          new google.maps.Marker({
+            position: {
+              lat: Number(lat) || 0,
+              lng: Number(lng) || 0
+            },
+            map: this.map,
+            icon: {
+              path:
+                index == 0
+                  ? START_MARKER_PATH
+                  : index + 1 == latlngs.length
+                  ? END_MARKER_PATH
+                  : EMPTY_MARKER_PATH,
+              fillColor,
+              fillOpacity,
+              strokeColor,
+              strokeWeight
+            },
+            index
+          })
+      );
+    } else {
+      var spots =
+        latlngs.length > 1
+          ? [latlngs[0], latlngs[latlngs.length - 1]]
+          : latlngs.length == 1
+          ? [latlngs[0]]
+          : [];
 
-    this.trackPath = new google.maps.Polyline({
-      path: latlngs,
-      geodesic: true,
-      strokeColor: "#FF0000",
-      strokeOpacity: 1,
-      strokeWeight: 4,
-      map: this.map
-    });
+      var markers = spots.map(
+        ({ lat, lng }, index) =>
+          new google.maps.Marker({
+            position: {
+              lat: Number(lat) || 0,
+              lng: Number(lng) || 0
+            },
+            map: this.map,
+            icon: {
+              path: index == 0 ? START_MARKER_PATH : END_MARKER_PATH,
+              fillColor,
+              fillOpacity,
+              strokeColor,
+              strokeWeight
+            },
+            index
+          })
+      );
+    }
+
+    if (showPath) {
+      this.trackPath = new google.maps.Polyline({
+        path: latlngs,
+        geodesic: true,
+        strokeColor: "#FF0000",
+        strokeOpacity: 1,
+        strokeWeight: 4,
+        map: this.map
+      });
+    }
 
     var infowindows = new Array(markers.length);
 
