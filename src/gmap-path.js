@@ -26,6 +26,11 @@ const NATURE = {
       type: "checkbox",
       label: "show-intermediate-markers",
       name: "showIntermediateMarkers"
+    },
+    {
+      type: "checkbox",
+      label: "start-end-marker-different-design",
+      name: "startEndMarkerDifferentDesign"
     }
   ],
   "value-property": "latlngs"
@@ -110,13 +115,14 @@ export default class GMapPath extends RectPath(Shape) {
       strokeStyle: strokeColor,
       lineWidth: strokeWeight,
       showIntermediateMarkers = false,
+      startEndMarkerDifferentDesign = true,
       showPath = false
     } = this.state;
 
     if (showIntermediateMarkers) {
-      var markers = latlngs.map(
-        ({ lat, lng }, index) =>
-          new google.maps.Marker({
+      var markers = latlngs.map(({ lat, lng }, index) => {
+        if (startEndMarkerDifferentDesign) {
+          return new google.maps.Marker({
             position: {
               lat: Number(lat) || 0,
               lng: Number(lng) || 0
@@ -135,8 +141,25 @@ export default class GMapPath extends RectPath(Shape) {
               strokeWeight
             },
             index
-          })
-      );
+          });
+        } else {
+          return new google.maps.Marker({
+            position: {
+              lat: Number(lat) || 0,
+              lng: Number(lng) || 0
+            },
+            map: this.map,
+            icon: {
+              path: EMPTY_MARKER_PATH,
+              fillColor,
+              fillOpacity,
+              strokeColor,
+              strokeWeight
+            },
+            index
+          });
+        }
+      });
     } else {
       var spots =
         latlngs.length > 1
@@ -145,9 +168,9 @@ export default class GMapPath extends RectPath(Shape) {
           ? [latlngs[0]]
           : [];
 
-      var markers = spots.map(
-        ({ lat, lng }, index) =>
-          new google.maps.Marker({
+      var markers = spots.map(({ lat, lng }, index) => {
+        if (startEndMarkerDifferentDesign) {
+          return new google.maps.Marker({
             position: {
               lat: Number(lat) || 0,
               lng: Number(lng) || 0
@@ -161,8 +184,25 @@ export default class GMapPath extends RectPath(Shape) {
               strokeWeight
             },
             index
-          })
-      );
+          });
+        } else {
+          return new google.maps.Marker({
+            position: {
+              lat: Number(lat) || 0,
+              lng: Number(lng) || 0
+            },
+            map: this.map,
+            icon: {
+              path: EMPTY_MARKER_PATH,
+              fillColor,
+              fillOpacity,
+              strokeColor,
+              strokeWeight
+            },
+            index
+          });
+        }
+      });
     }
 
     if (showPath) {

@@ -1,5 +1,6 @@
 {
   "label.target-map": "Target Map",
   "label.show-path": "Show Path",
-  "label.show-intermediate-markers": "Show Intermediate Markers"
+  "label.show-intermediate-markers": "Show Intermediate Markers",
+  "label.start-end-marker-different-design": "Apply First and Last Marker Design"
 }

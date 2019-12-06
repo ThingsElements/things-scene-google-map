@@ -18,6 +18,7 @@ export default {
         lng: 114.225443
       }
     ],
+    startEndMarkerDifferentDesign: true,
     fillStyle: "#00ff00",
     hidden: true
   }
